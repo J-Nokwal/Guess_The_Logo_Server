@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "pb/";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+
+package guessthelogo;
+
+
+
+message UserData {
+    uint64 Id =1;
+    uint64 MaxScore =2;
+    string UserName=3;
+}
