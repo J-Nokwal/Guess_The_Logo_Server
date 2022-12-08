@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "pb/";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+
+package guessthelogo;
+import "proto/game-message.proto";
+import "proto/user-message.proto";
+import "proto/scoreboard-message.proto";
+import "google/protobuf/empty.proto";
+
+service Game {
+    rpc CreateUser(createUserRequest) returns (google.protobuf.Empty){};
+    rpc StartGame(stream GameRequest) returns (stream GameStatus) {};
+    rpc GetScoreBoard(google.protobuf.Empty) returns (ScoreBoard){};
+  }

@@ -8,7 +8,7 @@ import (
 var db *gorm.DB
 
 func init() {
-	configs.Connect()
+	configs.Connect_db()
 	db = configs.GetDB()
-	db.AutoMigrate(&User{}, &User{}, &Logo{}, &Report{}, &Game{})
+	db.AutoMigrate(&User{}, &Logo{}, &Report{}, &Game{})
 }

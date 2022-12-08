@@ -13,3 +13,6 @@ message UserData {
     uint64 MaxScore =2;
     string UserName=3;
 }
+message createUserRequest{
+    string UserName=1;
+}

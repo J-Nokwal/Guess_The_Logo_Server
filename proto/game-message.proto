@@ -5,13 +5,71 @@ option java_multiple_files = true;
 option java_package = "io.grpc.examples.helloworld";
 
 package guessthelogo;
+import "proto/logo-message.proto";
+enum Level{
+    UNSPECIFIED = 0;
+    Easy=1;
+    Medium=2;
+    Hard=3;
+}
 
+message UserAction{
+    oneof action{
+        GameRequest GameRequest=1;
+        QuestionAnswer QuestionAnswer=2;
+    }
+}
+message QuestionAnswer{
+    int32 Answer=1;
+}
+message GameRequest{
+    Level Level=1;
+}
+message GameStatus{
+    int32 GameId=1;
+    oneof status{
+        StartStatus StartStatus=2;
+        Question Question=3;
+        ResultStatus ResultStatus=4;
+    }
+}
 
-message Logo {
+message StartStatus {
+    int32 NumberOfQuestions = 1;
+    int32 TimePerQueston = 2;
+}
+message ResultStatus{
+    repeated Question Question=1;
+    repeated int32 Ans=2;
+    int32 Score=3;
+}
+
+message Question {
     uint64 Id =1;
     bytes Image=2;
+    oneof Type {
+        ImageQuestion ImageQuestion=3;
+        NameQuestion NameQuestion=4;
+    }
+    int32 QuestionNumber = 5;
+
 }
-message LogoName{
+// select the Image (1 name string 4 images)
+message ImageQuestion{
     uint64 Id=1;
-    string Name=2;
+    LogoName Name=2;
+    Logo Image1=3;
+    Logo Image2=4;
+    Logo Image3=5;
+    Logo Image4=6;
+}
+
+// selct the Name (1 Image 4 name strings)
+message NameQuestion{
+    uint64 Id=1;
+    Logo Image=2;
+    LogoName Name1=3;
+    LogoName Name2=4;
+    LogoName Name3=5;
+    LogoName Name4=6;
 }
