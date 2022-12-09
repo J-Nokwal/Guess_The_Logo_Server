@@ -21,12 +21,13 @@ message UserAction{
 }
 message QuestionAnswer{
     int32 Answer=1;
+    int32 QuestionId=2;
 }
 message GameRequest{
     Level Level=1;
 }
 message GameStatus{
-    int32 GameId=1;
+    int32 GameId=1; 
     oneof status{
         StartStatus StartStatus=2;
         Question Question=3;
@@ -41,17 +42,18 @@ message StartStatus {
 message ResultStatus{
     repeated Question Question=1;
     repeated int32 Ans=2;
-    int32 Score=3;
+    repeated int32 MarkedAns=3;
+    repeated int32 scoreOfEachQuestion=4; 
+    int32 Score=5;
 }
 
 message Question {
     uint64 Id =1;
-    bytes Image=2;
     oneof Type {
-        ImageQuestion ImageQuestion=3;
-        NameQuestion NameQuestion=4;
+        ImageQuestion ImageQuestion=2;
+        NameQuestion NameQuestion=3;
     }
-    int32 QuestionNumber = 5;
+    int32 QuestionNumber = 4;
 
 }
 // select the Image (1 name string 4 images)

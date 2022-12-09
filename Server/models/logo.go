@@ -13,11 +13,11 @@ type Logo struct {
 	Name      string `json:"logo_name" gorm:"type:varchar(300)"`
 }
 
-func GetRandomLogo() error {
+func GetRandomLogo() ([]Logo, error) {
 	var logos []Logo
 	db.Limit(4).Clauses(clause.OrderBy{
 		Expression: clause.Expr{SQL: "RAND()", Vars: []interface{}{}, WithoutParentheses: true},
 	}).Find(&logos)
 	fmt.Println(logos)
-	return nil
+	return logos, nil
 }

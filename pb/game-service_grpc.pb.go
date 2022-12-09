@@ -26,6 +26,7 @@ type GameClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	StartGame(ctx context.Context, opts ...grpc.CallOption) (Game_StartGameClient, error)
 	GetScoreBoard(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ScoreBoard, error)
+	SendSampleImage(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Logo, error)
 }
 
 type gameClient struct {
@@ -55,7 +56,7 @@ func (c *gameClient) StartGame(ctx context.Context, opts ...grpc.CallOption) (Ga
 }
 
 type Game_StartGameClient interface {
-	Send(*GameRequest) error
+	Send(*UserAction) error
 	Recv() (*GameStatus, error)
 	grpc.ClientStream
 }
@@ -64,7 +65,7 @@ type gameStartGameClient struct {
 	grpc.ClientStream
 }
 
-func (x *gameStartGameClient) Send(m *GameRequest) error {
+func (x *gameStartGameClient) Send(m *UserAction) error {
 	return x.ClientStream.SendMsg(m)
 }
 
@@ -85,6 +86,15 @@ func (c *gameClient) GetScoreBoard(ctx context.Context, in *empty.Empty, opts ..
 	return out, nil
 }
 
+func (c *gameClient) SendSampleImage(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Logo, error) {
+	out := new(Logo)
+	err := c.cc.Invoke(ctx, "/guessthelogo.Game/SendSampleImage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServer is the server API for Game service.
 // All implementations must embed UnimplementedGameServer
 // for forward compatibility
@@ -92,6 +102,7 @@ type GameServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*empty.Empty, error)
 	StartGame(Game_StartGameServer) error
 	GetScoreBoard(context.Context, *empty.Empty) (*ScoreBoard, error)
+	SendSampleImage(context.Context, *empty.Empty) (*Logo, error)
 	mustEmbedUnimplementedGameServer()
 }
 
@@ -107,6 +118,9 @@ func (UnimplementedGameServer) StartGame(Game_StartGameServer) error {
 }
 func (UnimplementedGameServer) GetScoreBoard(context.Context, *empty.Empty) (*ScoreBoard, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetScoreBoard not implemented")
+}
+func (UnimplementedGameServer) SendSampleImage(context.Context, *empty.Empty) (*Logo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendSampleImage not implemented")
 }
 func (UnimplementedGameServer) mustEmbedUnimplementedGameServer() {}
 
@@ -145,7 +159,7 @@ func _Game_StartGame_Handler(srv interface{}, stream grpc.ServerStream) error {
 
 type Game_StartGameServer interface {
 	Send(*GameStatus) error
-	Recv() (*GameRequest, error)
+	Recv() (*UserAction, error)
 	grpc.ServerStream
 }
 
@@ -157,8 +171,8 @@ func (x *gameStartGameServer) Send(m *GameStatus) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *gameStartGameServer) Recv() (*GameRequest, error) {
-	m := new(GameRequest)
+func (x *gameStartGameServer) Recv() (*UserAction, error) {
+	m := new(UserAction)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -183,6 +197,24 @@ func _Game_GetScoreBoard_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Game_SendSampleImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).SendSampleImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/guessthelogo.Game/SendSampleImage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).SendSampleImage(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Game_ServiceDesc is the grpc.ServiceDesc for Game service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -197,6 +229,10 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetScoreBoard",
 			Handler:    _Game_GetScoreBoard_Handler,
+		},
+		{
+			MethodName: "SendSampleImage",
+			Handler:    _Game_SendSampleImage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
