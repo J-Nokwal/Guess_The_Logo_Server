@@ -26,19 +26,20 @@ func (server *Server) StartGame(stream pb.Game_StartGameServer) error {
 	case *pb.UserAction_QuestionAnswer:
 		return fmt.Errorf("Error in Starting Game, Cant Send Answer Before Game Start")
 	}
+	var timePerQuestion int32 = 2
 	stream.Send(&pb.GameStatus{
 		GameId: 1,
 		Status: &pb.GameStatus_StartStatus{
 			StartStatus: &pb.StartStatus{
 				NumberOfQuestions: 10,
-				TimePerQueston:    10,
+				TimePerQueston:    timePerQuestion,
 			},
 		},
 	})
 	var nextQuestionChannel = make(chan int)
 	var closeChan = make(chan error)
 	result := &pb.ResultStatus{}
-	go sendQuestionStream(stream, nextQuestionChannel, closeChan, result)
+	go sendQuestionStream(stream, nextQuestionChannel, closeChan, result, timePerQuestion)
 	go recieveAnswerStream(stream, nextQuestionChannel)
 
 	select {
@@ -66,7 +67,7 @@ func (server *Server) StartGame(stream pb.Game_StartGameServer) error {
 	return nil
 }
 
-func sendQuestionStream(stream pb.Game_StartGameServer, nextQuestionChannel chan int, closeChan chan error, result *pb.ResultStatus) {
+func sendQuestionStream(stream pb.Game_StartGameServer, nextQuestionChannel chan int, closeChan chan error, result *pb.ResultStatus, timePerQuestion int32) {
 	for i := 0; i < 10; i += 1 {
 		q, ans, err := getRandomQuestion(i + 1)
 		result.Ans = append(result.Ans, int32(*ans))
@@ -93,7 +94,7 @@ func sendQuestionStream(stream pb.Game_StartGameServer, nextQuestionChannel chan
 				result.Score += 10
 				result.ScoreOfEachQuestion[i] = 10
 			}
-		case <-time.After(4 * time.Second):
+		case <-time.After(time.Second * time.Duration(timePerQuestion)):
 			fmt.Println("Out of time :(")
 		}
 	}
@@ -171,9 +172,9 @@ func getRandomImageQuestion(logoModels []models.Logo, randAns int) (*pb.ImageQue
 		case 1:
 			q.Image2 = logo
 		case 2:
-			q.Image2 = logo
-		case 3:
 			q.Image3 = logo
+		case 3:
+			q.Image4 = logo
 
 		}
 	}

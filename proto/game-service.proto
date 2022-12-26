@@ -18,3 +18,4 @@ service Game {
     rpc GetScoreBoard(google.protobuf.Empty) returns (ScoreBoard){};
     rpc SendSampleImage(google.protobuf.Empty) returns (Logo){}; 
   }
+  

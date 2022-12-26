@@ -39,6 +39,7 @@ message StartStatus {
     int32 NumberOfQuestions = 1;
     int32 TimePerQueston = 2;
 }
+
 message ResultStatus{
     repeated Question Question=1;
     repeated int32 Ans=2;

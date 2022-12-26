@@ -3,37 +3,38 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func main() {
-	// db, err := gorm.Open("mysql", "root:qwer1234@tcp(127.0.0.1:3306)/Guess_The_Logo?charset=utf8&parseTime=True&loc=Local")
-	db, err := gorm.Open(mysql.Open("root:qwer1234@tcp(127.0.0.1:3306)/Guess_The_Logo?charset=utf8&parseTime=True&loc=Local"), &gorm.Config{})
+	modifyPngExtension()
+	// // db, err := gorm.Open("mysql", "root:qwer1234@tcp(127.0.0.1:3306)/Guess_The_Logo?charset=utf8&parseTime=True&loc=Local")
+	// db, err := gorm.Open(mysql.Open("root:qwer1234@tcp(127.0.0.1:3306)/Guess_The_Logo?charset=utf8&parseTime=True&loc=Local"), &gorm.Config{})
 
-	if err != nil {
-		panic(err)
-	}
-	db.Migrator().DropTable(&Logo{})
-	db.AutoMigrate(&Logo{})
-	fmt.Println(db)
-	records := readCsvFile("./LogoDatabase.csv")
-	fmt.Println(records[1])
-	var logoList []Logo
-	for i, item := range records {
-		fmt.Println(i, item)
-		var logo Logo
-		logo.Name = item[0]
-		logo.ImagePath = item[1]
-		logoList = append(logoList, logo)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// db.Migrator().DropTable(&Logo{})
+	// db.AutoMigrate(&Logo{})
+	// fmt.Println(db)
+	// records := readCsvFile("./LogoDatabase.csv")
+	// fmt.Println(records[1])
+	// var logoList []Logo
+	// for i, item := range records {
+	// 	fmt.Println(i, item)
+	// 	var logo Logo
+	// 	logo.Name = item[0]
+	// 	logo.ImagePath = item[1]
+	// 	logoList = append(logoList, logo)
 
-	}
-	if errList := db.Create(&logoList).Error; errList != nil {
-		fmt.Println(errList)
-	}
+	// }
+	// if errList := db.Create(&logoList).Error; errList != nil {
+	// 	fmt.Println(errList)
+	// }
 
 }
 
@@ -57,4 +58,16 @@ func readCsvFile(filePath string) [][]string {
 	}
 
 	return records
+}
+
+func modifyPngExtension() {
+	items, _ := ioutil.ReadDir("../Logos")
+	for _, item := range items {
+		// fmt.Println(item.Name()[len(item.Name())-4:])
+		if s := item.Name()[len(item.Name())-4:]; s != ".png" && s != ".jpg" {
+			fmt.Println(item.Name())
+			os.Rename("../Logos/"+item.Name(), "../Logos/"+item.Name()+".png")
+		}
+
+	}
 }
